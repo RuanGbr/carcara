@@ -7,7 +7,8 @@ export const createCustomerSchema = z.object({
 			1,
 			'Muito curto: esperava-se um texto com pelo menos 1 caractere.'
 		),
-	email: z.email('Endereço de e-mail inválido.')
+	email: z.email('Endereço de e-mail inválido.'),
+	imageURL: z.url().optional()
 });
 
 export const updateCustomerSchema = z.object({
@@ -16,7 +17,7 @@ export const updateCustomerSchema = z.object({
 		.min(1, 'Muito curto: esperava-se um texto com pelo menos 1 caractere.')
 		.optional(),
 	email: z.email('Endereço de e-mail inválido.').optional(),
-	status: z.boolean('Entrada inválida: esperava-se um booleano.')
+	imagemUrl: z.url('Endereço de url inválido.').optional()
 });
 
 export type CreateCustomer = z.infer<typeof createCustomerSchema>;
