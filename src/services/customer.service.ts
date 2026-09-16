@@ -7,16 +7,14 @@ import type {
 import type { Customer } from '../types.ts';
 
 export async function findAllCustomers(): Promise<Customer[]> {
-	const customers = await prisma.customer.findMany();
-
-	return customers;
+	return await prisma.customer.findMany({ orderBy: { createdAt: 'desc' } });
 }
 
 export async function findCustomerById(id: number): Promise<Customer> {
 	const customer = await prisma.customer.findUnique({ where: { id } });
 
 	if (!customer) {
-		throw new NotFoundError('Cliente não encontrado.');
+		throw new NotFoundError(`Cliente com id ${id} não encontrado.`);
 	}
 
 	return customer;
@@ -24,48 +22,25 @@ export async function findCustomerById(id: number): Promise<Customer> {
 
 export async function insertCustomer({
 	name,
-	email,
-	imageUrl
+	email
 }: CreateCustomer): Promise<Customer> {
-	const customer = await prisma.customer.create({
-		data: {
-			name,
-			email,
-			imageUrl
-		}
-	});
-
-	return customer;
+	return prisma.customer.create({ data: { name, email } });
 }
 
 export async function modifyCustomer(
 	id: number,
 	{ name, email, imageUrl }: UpdateCustomer
 ): Promise<Customer> {
-	const findCustomer = await prisma.customer.findUnique({ where: { id } });
+	await findCustomerById(id);
 
-	if (!findCustomer) {
-		throw new NotFoundError('Cliente não encontrado.');
-	}
-
-	const customer = await prisma.customer.update({
+	return prisma.customer.update({
 		where: { id },
-		data: {
-			name,
-			email,
-			imageUrl
-		}
+		data: { name, email, imageUrl }
 	});
-
-	return customer;
 }
 
 export async function removeCustomer(id: number): Promise<void> {
-	const findCustomer = await prisma.customer.findUnique({ where: { id } });
-
-	if (!findCustomer) {
-		throw new NotFoundError('Cliente não encontrado.');
-	}
+	await findCustomerById(id);
 
 	await prisma.customer.delete({ where: { id } });
 }
