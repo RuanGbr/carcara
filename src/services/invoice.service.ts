@@ -1,20 +1,23 @@
-import type { InvoiceStatus } from '../../prisma/generated/client.ts';
 import { NotFoundError } from '../errors/index.ts';
 import prisma from '../lib/prisma.ts';
 import type { CreateInvoice, UpdateInvoice } from '../schemas/invoice.shema.ts';
 
 export async function findAllInvoices(page: number) {
-	return prisma.invoice.findMany({
+	const invoices = await prisma.invoice.findMany({
 		include: { customer: true },
 		orderBy: { date: 'desc' },
 		skip: (page - 1) * 10,
 		take: 10
 	});
+
+	return invoices;
 }
 
 export async function findInvoiceById(id: number) {
 	const invoice = await prisma.invoice.findUnique({
-		where: { id },
+		where: {
+			id
+		},
 		include: { customer: true }
 	});
 
@@ -25,36 +28,54 @@ export async function findInvoiceById(id: number) {
 	return invoice;
 }
 
-export async function insertInvoice(
-	customerId: number,
-	{ amount, status, date }: CreateInvoice
-) {
-	return prisma.invoice.create({
+export async function insertInvoice({
+	amount,
+	customerId,
+	status,
+	date
+}: CreateInvoice) {
+	const invoice = await prisma.invoice.create({
 		data: {
 			amount,
+			customer: { connect: { id: customerId } },
 			status,
-			date,
-			customer: { connect: { id: customerId } }
-		},
-		include: { customer: true }
+			date
+		}
 	});
+
+	return invoice;
 }
 
 export async function modifyInvoice(
 	id: number,
-	{ amount, status, date }: UpdateInvoice
+	{ amount, customerId, status, date }: UpdateInvoice
 ) {
 	await findInvoiceById(id);
 
-	return prisma.invoice.update({
-		where: { id },
-		data: { amount, status, date },
-		include: { customer: true }
+	const invoice = await prisma.invoice.update({
+		where: {
+			id
+		},
+		data: {
+			amount,
+			customerId,
+			date,
+			status
+		},
+		include: {
+			customer: true
+		}
 	});
+
+	return invoice;
 }
 
 export async function removeInvoice(id: number): Promise<void> {
 	await findInvoiceById(id);
 
-	await prisma.invoice.delete({ where: { id } });
+	await prisma.invoice.delete({
+		where: {
+			id
+		}
+	});
 }
