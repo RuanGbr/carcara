@@ -11,4 +11,8 @@ module.exports = {
             }
         ]
     },
+    moduleNameMapper: {
+		'^(@prisma/client/runtime/.*)\\.mjs$': '$1.js'
+	},
+	testMatch: ['<rootDir>/tests/**/*.test.ts']
 }
