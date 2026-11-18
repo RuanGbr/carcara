@@ -1,21 +1,8 @@
-import express from 'express';
-import errorHandler from './middlewares/errorHandler.ts';
-import CustomerRouter from './routes/customer.router.ts';
-import InvoiceRouter from './routes/invoice.route.ts';
+import app from './app.ts';
+import logger from './lib/logger.ts';
 
-const app = express();
+const port = Number(process.env.PORT) || 3000;
 
-app.use(express.json());
-
-app.use('/customers', CustomerRouter);
-app.use('/invoices', InvoiceRouter);
-
-app.use((_request, response) => {
-	response.status(404).json({
-		message: 'Not found!'
-	});
+app.listen(port, () => {
+	logger.info(`Servidor rodando na porta ${port}`);
 });
-
-app.use(errorHandler);
-
-export default app;
